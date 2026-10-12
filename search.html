@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search - Skill Swap</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        .header {
+            background: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .logo { font-size: 24px; font-weight: bold; }
+        .logo span:first-child { color: #667eea; }
+        .logo span:last-child { color: #764ba2; }
+        .nav a { margin-left: 25px; text-decoration: none; color: #555; }
+        .logout-btn { background: #dc3545; color: white !important; padding: 8px 20px; border-radius: 25px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px; }
+        .search-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .user-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .user-card:hover { transform: translateY(-5px); }
+        .user-name { font-size: 18px; font-weight: bold; color: #667eea; }
+        .user-email { font-size: 12px; color: #888; margin: 5px 0; }
+        .skill-tag {
+            display: inline-block;
+            background: #e0e7ff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 3px;
+        }
+        .view-profile-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        @media (max-width: 768px) { .header { flex-direction: column; gap: 15px; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo"><span>Skill</span> <span>Swap</span></div>
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="search.html">Search</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="#" id="logoutBtn" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-card">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search by name or skill..." onkeyup="searchUsers()">
+        </div>
+        <div id="results" class="results-grid">
+            <div style="text-align:center;padding:50px;">Loading users...</div>
+        </div>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        if(!currentUser) window.location.href = 'login.html';
+
+        let allUsers = [];
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('http://localhost:8004/api/users/' + currentUser.id);
+                const data = await response.json();
+                allUsers = data.users || [];
+                
+                // Load skills for each user
+                for(let user of allUsers) {
+                    const skillsResponse = await fetch('http://localhost:8004/api/skills/' + user.id);
+                    const skillsData = await skillsResponse.json();
+                    user.skills = skillsData.skills || [];
+                }
+                
+                searchUsers();
+            } catch(error) {
+                console.error('Error loading users:', error);
+                document.getElementById('results').innerHTML = '<div style="text-align:center;padding:50px;">Error loading users. Make sure backend is running.</div>';
+            }
+        }
+
+        function searchUsers() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = [...allUsers];
+            
+            if(query) {
+                filtered = allUsers.filter(user => 
+                    user.name.toLowerCase().includes(query) ||
+                    (user.skills || []).some(s => s.skill_name.toLowerCase().includes(query))
+                );
+            }
+            
+            displayResults(filtered);
+        }
+
+        function displayResults(users) {
+            const container = document.getElementById('results');
+            if(users.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:50px;">No users found</div>';
+                return;
+            }
+            
+            container.innerHTML = users.map(user => `
+                <div class="user-card" onclick="viewProfile(${user.id})">
+                    <div class="user-name">${user.name}</div>
+                    <div class="user-email">${user.email}</div>
+                    <div class="user-skills">
+                        ${(user.skills || []).slice(0,5).map(s => `<span class="skill-tag">${s.skill_name} (${s.skill_type === 'teach' ? '📖' : '📚'})</span>`).join('')}
+                        ${(user.skills || []).length > 5 ? `<span class="skill-tag">+${user.skills.length - 5} more</span>` : ''}
+                    </div>
+                    <button class="view-profile-btn" onclick="event.stopPropagation(); viewProfile(${user.id})">👤 View Profile</button>
+                </div>
+            `).join('');
+        }
+
+        function viewProfile(userId) {
+            window.location.href = `profile.html?id=${userId}`;
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+
+        loadUsers();
+    </script>
+</body>
+</html>

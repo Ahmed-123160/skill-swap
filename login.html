@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Skill Swap</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .logo { text-align: center; font-size: 28px; font-weight: bold; margin-bottom: 20px; }
+        .logo span:first-child { color: #667eea; }
+        .logo span:last-child { color: #764ba2; }
+        h2 { text-align: center; margin-bottom: 25px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .signup-link { text-align: center; margin-top: 20px; }
+        .signup-link a { color: #667eea; text-decoration: none; }
+        .error { background: #fee; color: #dc3545; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo"><span>Skill</span> <span>Swap</span></div>
+        <h2>Sign In</h2>
+        <div id="errorMsg" class="error"></div>
+        <form id="loginForm">
+            <div class="input-group"><input type="email" id="email" placeholder="Email" required></div>
+            <div class="input-group"><input type="password" id="password" placeholder="Password" required></div>
+            <button type="submit" class="btn-login">Login</button>
+        </form>
+        <div class="signup-link">Don't have an account? <a href="register.html">Join Now</a></div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            document.getElementById('errorMsg').style.display = 'none';
+            
+            const submitBtn = document.querySelector('.btn-login');
+            submitBtn.textContent = 'Logging in...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('http://localhost:8004/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+                
+                const result = await response.json();
+                
+                if(response.ok) {
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showError(result.detail || 'Invalid email or password');
+                    submitBtn.textContent = 'Login';
+                    submitBtn.disabled = false;
+                }
+            } catch(error) {
+                showError('Cannot connect to server');
+                submitBtn.textContent = 'Login';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
+        }
+    </script>
+</body>
+</html>

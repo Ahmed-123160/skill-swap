@@ -1,0 +1,275 @@
+.playwrite-dk-uloopet-guides-regular {
+    font-family: "Playwrite DK Uloopet Guides", cursive;
+    font-weight: 400;
+    font-style: normal;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header {
+    background-color: #225c6f;
+    border: 1px #9f1fde solid;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 50px;
+    flex-wrap: wrap;
+}
+
+.logo {
+    width: 80px;
+    border-radius: 30px;
+}
+
+.header-links a {
+    color: white;
+    padding: 5px 25px;
+    text-decoration: none;
+    border-radius: 20px;
+    transition: background-color 0.3s;
+}
+
+.header-links a:hover {
+    background-color: #652a8d;
+}
+
+.header-links button {
+    background-color: #773399;
+    border-radius: 40px;
+    padding: 8px 20px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.header-links button:hover {
+    background-color: #5a2a7a;
+}
+
+.landing-page {
+    background-color: #0099cc;
+    color: #f8f2fb;
+    display: flex;
+    justify-content: space-between;
+    padding: 40px 50px;
+    align-items: center;
+    border-radius: 0 0 50px 50px;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.landing-page h2 {
+    font-size: 48px;
+    margin: 10px 0;
+}
+
+.landing-page-search {
+    position: relative;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+.landing-page-search input {
+    border-radius: 50px;
+    border: none;
+    outline: none;
+    height: 40px;
+    width: 250px;
+    padding-left: 20px;
+    padding-right: 100px;
+    font-size: 16px;
+}
+
+.landing-page-search button {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    height: 30px;
+    background-color: #773399;
+    border-radius: 40px;
+    padding: 0 20px;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.landing-page-search button:hover {
+    background-color: #ff1a1a;
+}
+
+/* Hero Message - بديل الصورة */
+.hero-message {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    max-width: 400px;
+    text-align: center;
+}
+
+.hero-message .icons {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.hero-message p {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.hero-message .tagline {
+    font-size: 14px;
+    font-style: italic;
+    border-top: 1px solid rgba(255,255,255,0.3);
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.landing-page-image-cont img {
+    border-radius: 30px;
+    max-width: 100%;
+}
+
+.category {
+    padding: 25px 50px;
+}
+
+.category h1 {
+    text-align: center;
+    color: #225c6f;
+}
+
+.category-ph {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cards {
+    width: 280px;
+    background-color: #EEEEEE;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.cards:hover {
+    transform: scale(1.05);
+}
+
+.card-info {
+    padding: 5px 25px 20px 25px;
+}
+
+.card-name p {
+    margin: 10px 0 5px 0;
+    color: #773399;
+    font-weight: bold;
+}
+
+.card-name h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #225c6f;
+}
+
+.cards img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.cards:hover img {
+    transform: scale(1.05);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    min-width: 320px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.modal-content input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+.modal-content button {
+    margin-top: 15px;
+    padding: 8px 20px;
+    background-color: #773399;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    display: none;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        justify-content: center;
+        text-align: center;
+        gap: 15px;
+    }
+    .landing-page {
+        justify-content: center;
+        text-align: center;
+    }
+    .landing-page h2 {
+        font-size: 32px;
+    }
+    .category {
+        padding: 25px 20px;
+    }
+}

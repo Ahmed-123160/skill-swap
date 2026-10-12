@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Skill Swap</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .register-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 450px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .logo { text-align: center; font-size: 28px; font-weight: bold; margin-bottom: 20px; }
+        .logo span:first-child { color: #667eea; }
+        .logo span:last-child { color: #764ba2; }
+        h2 { text-align: center; margin-bottom: 25px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .login-link { text-align: center; margin-top: 20px; }
+        .login-link a { color: #667eea; text-decoration: none; }
+        .error { background: #fee; color: #dc3545; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; }
+        .success { background: #d4edda; color: #28a745; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; }
+        /* Password requirements styling */
+.password-requirements {
+    margin-bottom: 15px;
+    font-size: 12px;
+}
+.password-requirements small {
+    display: block;
+    margin-top: 5px;
+    color: #888;
+}
+.password-requirements span {
+    margin-left: 10px;
+}
+.requirement-met {
+    color: #28a745 !important;
+}
+.requirement-unmet {
+    color: #888 !important;
+}
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <div class="logo"><span>Skill</span> <span>Swap</span></div>
+        <h2>Create Account</h2>
+        <div id="errorMsg" class="error"></div>
+        <div id="successMsg" class="success"></div>
+        <form id="registerForm">
+            <div class="input-group"><input type="text" id="fullname" placeholder="Full Name" required></div>
+            <div class="input-group"><input type="email" id="email" placeholder="Email" required></div>
+            <div class="input-group">
+    <input type="password" id="password" placeholder="Password" required onkeyup="updatePasswordRequirements(this.value)">
+</div>
+<div class="password-requirements" id="passwordRequirements">
+    <small>
+        Password must contain:
+        <span id="reqLength">✗ 8+ characters</span> |
+        <span id="reqUpper">✗ Uppercase</span> |
+        <span id="reqLower">✗ Lowercase</span> |
+        <span id="reqNumber">✗ Number</span> |
+        <span id="reqSpecial">✗ Special char (!@#$%^&*)</span>
+    </small>
+</div>
+            <div class="input-group"><input type="password" id="confirm_password" placeholder="Confirm Password" required></div>
+            <div class="input-group"><input type="text" id="location" placeholder="Location (optional)"></div>
+            <button type="submit" class="btn-register">Join Now</button>
+        </form>
+        <div class="login-link">Already have an account? <a href="login.html">Login</a></div>
+    </div>
+
+    <script>
+        // Initialize password requirements when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial password requirements display
+    updatePasswordRequirements('');
+});
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fullname = document.getElementById('fullname').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const passwordError = validatePassword(password);
+if(passwordError) {
+    showError(passwordError);
+    submitBtn.textContent = 'Join Now';
+    submitBtn.disabled = false;
+    return;
+}
+            const confirm = document.getElementById('confirm_password').value;
+            const location = document.getElementById('location').value;
+            
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('successMsg').style.display = 'none';
+            
+            if(!fullname || !email || !password) {
+                showError('Please fill all required fields');
+                return;
+            }
+            
+            if(password !== confirm) {
+                showError('Passwords do not match');
+                return;
+            }
+            
+            if(password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+            
+            const submitBtn = document.querySelector('.btn-register');
+            submitBtn.textContent = 'Creating account...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('http://localhost:8004/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: fullname, email: email, password: password, location: location })
+                });
+                
+                const result = await response.json();
+                
+                if(response.ok) {
+                    document.getElementById('successMsg').textContent = '✅ Account created successfully! Redirecting to login...';
+                    document.getElementById('successMsg').style.display = 'block';
+                    setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+                } else {
+                    showError(result.detail || 'Registration failed');
+                    submitBtn.textContent = 'Join Now';
+                    submitBtn.disabled = false;
+                }
+            } catch(error) {
+                showError('Cannot connect to server. Make sure backend is running: python backend.py');
+                submitBtn.textContent = 'Join Now';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
+        }
+        // ========== PASSWORD VALIDATION FUNCTIONS ==========
+
+function validatePassword(password) {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    if(password.length < minLength) {
+        return '❌ Password must be at least 8 characters';
+    }
+    if(!hasUpperCase) {
+        return '❌ Password must contain at least one uppercase letter (A-Z)';
+    }
+    if(!hasLowerCase) {
+        return '❌ Password must contain at least one lowercase letter (a-z)';
+    }
+    if(!hasNumbers) {
+        return '❌ Password must contain at least one number (0-9)';
+    }
+    if(!hasSpecialChar) {
+        return '❌ Password must contain at least one special character (!@#$%^&*)';
+    }
+    return null;
+}
+
+function updatePasswordRequirements(password) {
+    const reqLength = document.getElementById('reqLength');
+    const reqUpper = document.getElementById('reqUpper');
+    const reqLower = document.getElementById('reqLower');
+    const reqNumber = document.getElementById('reqNumber');
+    const reqSpecial = document.getElementById('reqSpecial');
+    
+    if(reqLength) {
+        reqLength.innerHTML = password.length >= 8 ? '✓ 8+ characters' : '✗ 8+ characters';
+        reqLength.style.color = password.length >= 8 ? '#28a745' : '#888';
+    }
+    if(reqUpper) {
+        reqUpper.innerHTML = /[A-Z]/.test(password) ? '✓ Uppercase' : '✗ Uppercase';
+        reqUpper.style.color = /[A-Z]/.test(password) ? '#28a745' : '#888';
+    }
+    if(reqLower) {
+        reqLower.innerHTML = /[a-z]/.test(password) ? '✓ Lowercase' : '✗ Lowercase';
+        reqLower.style.color = /[a-z]/.test(password) ? '#28a745' : '#888';
+    }
+    if(reqNumber) {
+        reqNumber.innerHTML = /\d/.test(password) ? '✓ Number' : '✗ Number';
+        reqNumber.style.color = /\d/.test(password) ? '#28a745' : '#888';
+    }
+    if(reqSpecial) {
+        reqSpecial.innerHTML = /[!@#$%^&*(),.?":{}|<>]/.test(password) ? '✓ Special char' : '✗ Special char';
+        reqSpecial.style.color = /[!@#$%^&*(),.?":{}|<>]/.test(password) ? '#28a745' : '#888';
+    }
+}
+    </script>
+</body>
+</html>

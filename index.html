@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Swap - Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playwrite+DK+Uloopet+Guides&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <img class="logo" src="image/155-1553063_digital-skill-swapping-cartoon.png" alt="logo">
+    <div class="header-links">
+        <a href="index.html">Home</a>
+        <a href="search.html">Search</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="chat.html">Messages</a>
+        <a href="login.html">Login</a>
+        <button onclick="window.location.href='register.html'">Join Now</button>
+    </div>
+</div>
+
+<!-- LANDING PAGE -->
+<div class="landing-page">
+    <div>
+        <span>Welcome to</span>
+        <h2 style="font-family: 'Playwrite DK Uloopet Guides', cursive;">Skill Swap</h2>
+        <p>Exchange knowledge • Learn together • Grow together</p>
+        <div class="landing-page-search">
+            <input id="searchInput" placeholder="What skill you want to learn?"/>
+            <button id="searchBtn">Search</button>
+        </div>
+    </div>
+    <!-- Hero Message بدلاً من الصورة -->
+    <div class="hero-message">
+        <div class="icons">🤝💡📚</div>
+        <p><strong>Teach what you know • Learn what you love</strong></p>
+        <p>A platform where people exchange skills for free.<br>No money needed — just knowledge and passion.</p>
+        <div class="tagline">"The beautiful thing about learning is that no one can take it away from you."</div>
+    </div>
+</div>
+
+<!-- CATEGORY SECTION -->
+<div class="category">
+    <h1>📚 Popular Categories</h1>
+    <div class="category-ph">
+        <div class="cards" onclick="showSkillModal('Free Learning', 'Learn any skill for free')">
+            <img src="image/html2.png.jpeg" alt="learning">
+            <div class="card-info">
+                <div class="card-name">
+                    <p>Learning</p>
+                    <h2>Free Learning</h2>
+                </div>
+            </div>
+        </div>
+        <div class="cards" onclick="showSkillModal('Cooperation', 'We exchange ideas and skills')">
+            <img src="image/html3.png.jpeg" alt="cooperation">
+            <div class="card-info">
+                <div class="card-name">
+                    <p>Cooperation</p>
+                    <h2>We exchange ideas</h2>
+                </div>
+            </div>
+        </div>
+        <div class="cards" onclick="showSkillModal('Help', 'We help each other grow')">
+            <img src="image/html4.png.jpeg" alt="help">
+            <div class="card-info">
+                <div class="card-name">
+                    <p>Help</p>
+                    <h2>We help each other</h2>
+                </div>
+            </div>
+        </div>
+        <div class="cards" onclick="showSkillModal('Growth', 'Develop your skills')">
+            <img src="image/TLMS_20231117_1200x628-1.png" alt="growth">
+            <div class="card-info">
+                <div class="card-name">
+                    <p>Growth</p>
+                    <h2>Develop skills</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SIGN IN MODAL -->
+<div id="signinModal" class="modal">
+    <div class="modal-content">
+        <h3>🔐 Sign In</h3>
+        <input type="text" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <br>
+        <button onclick="loginUser()">Login</button>
+        <button onclick="closeModal()">Cancel</button>
+        <p style="margin-top: 10px; font-size: 12px;">Don't have an account? <a href="register.html">Join Now</a></p>
+    </div>
+</div>
+
+<!-- TOAST MESSAGE -->
+<div id="toast" class="toast"></div>
+
+<script>
+    function showMessage(msg) {
+        let toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 2000);
+    }
+
+    function showSkillModal(title, desc) {
+        showMessage(`📚 ${title}: ${desc}`);
+    }
+
+    function openModal() {
+        document.getElementById('signinModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('signinModal').style.display = 'none';
+    }
+
+    async function loginUser() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        if(!email || !password) {
+            showMessage('Please enter email and password');
+            return;
+        }
+        
+        try {
+            const response = await fetch('http://localhost:8004/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const result = await response.json();
+            
+            if(response.ok) {
+                localStorage.setItem('user', JSON.stringify(result.user));
+                showMessage('✅ Login successful! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            } else {
+                showMessage('❌ ' + result.detail);
+            }
+        } catch(error) {
+            showMessage('❌ Cannot connect to server');
+        }
+    }
+
+    // Search functionality
+    document.getElementById('searchBtn').addEventListener('click', function() {
+        let input = document.getElementById('searchInput');
+        let searchText = input.value.trim();
+        if(searchText === '') {
+            showMessage('✏️ Please enter a skill to search');
+        } else {
+            showMessage('🔍 Searching for: "' + searchText + '"');
+            setTimeout(() => {
+                window.location.href = `search.html?q=${encodeURIComponent(searchText)}`;
+            }, 1000);
+        }
+    });
+
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') {
+            document.getElementById('searchBtn').click();
+        }
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        let modal = document.getElementById('signinModal');
+        if(event.target === modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Skill Swap</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        .header {
+            background: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-size: 24px; font-weight: bold; }
+        .logo span:first-child { color: #667eea; }
+        .logo span:last-child { color: #764ba2; }
+        .nav a { margin-left: 25px; text-decoration: none; color: #555; }
+        .container { max-width: 800px; margin: 0 auto; padding: 30px; }
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+        }
+        .skill-section { margin-top: 25px; }
+        .skill-section h3 { color: #667eea; margin-bottom: 15px; }
+        .skill-tag {
+            display: inline-block;
+            background: #e0e7ff;
+            padding: 8px 16px;
+            border-radius: 25px;
+            margin: 5px;
+            color: #667eea;
+        }
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .contact-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo"><span>Skill</span> <span>Swap</span></div>
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="search.html">Search</a>
+            <a href="dashboard.html">Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='search.html'">← Back</button>
+        <div class="profile-card" id="profileContent">
+            <div style="text-align:center;padding:50px;">Loading profile...</div>
+        </div>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        if(!currentUser) window.location.href = 'login.html';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = parseInt(urlParams.get('id'));
+
+        async function loadProfile() {
+            try {
+                const response = await fetch('http://localhost:8004/api/users/' + currentUser.id);
+                const users = await response.json();
+                const profileUser = users.users.find(u => u.id === userId);
+                
+                const skillsResponse = await fetch('http://localhost:8004/api/skills/' + userId);
+                const skillsData = await skillsResponse.json();
+                const skills = skillsData.skills || [];
+                
+                const teachSkills = skills.filter(s => s.skill_type === 'teach');
+                const learnSkills = skills.filter(s => s.skill_type === 'learn');
+                
+                document.getElementById('profileContent').innerHTML = `
+                    <div class="profile-header">
+                        <div class="avatar">${profileUser.name.charAt(0)}</div>
+                        <div>
+                            <h2>${profileUser.name}</h2>
+                            <p>📧 ${profileUser.email}</p>
+                            <p>⭐ ${profileUser.rating || 0}/5</p>
+                        </div>
+                    </div>
+                    <div class="skill-section">
+                        <h3>🎓 Skills I Can Teach</h3>
+                        ${teachSkills.length === 0 ? '<p>No skills listed</p>' : teachSkills.map(s => `<span class="skill-tag">${s.skill_name}</span>`).join('')}
+                    </div>
+                    <div class="skill-section">
+                        <h3>📚 Skills I Want to Learn</h3>
+                        ${learnSkills.length === 0 ? '<p>No skills listed</p>' : learnSkills.map(s => `<span class="skill-tag">${s.skill_name}</span>`).join('')}
+                    </div>
+                    <button class="contact-btn" onclick="window.location.href='chat.html?user=${userId}'">💬 Send Message</button>
+                `;
+            } catch(error) {
+                document.getElementById('profileContent').innerHTML = '<div style="text-align:center;padding:50px;">Error loading profile</div>';
+            }
+        }
+
+        loadProfile();
+    </script>
+</body>
+</html>
